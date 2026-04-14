@@ -86,7 +86,9 @@ Required item fields:
 - `lead_time` integer >= 0
 - `lot_size` integer > 0
 - `on_hand` integer >= 0
-- `scheduled_receipts` object with week keys as strings and integer quantities >= 0
+- `scheduled_receipts` object with week keys as strings and integer quantities >= 0.
+
+     `{"1": 20, "5": 5}` means 20 items come on week 1, 5 items on week 5.
 - `parents` array of `{ "parent_id": "...", "quantity_required": int > 0 }`
 
 ### GHP CSV
