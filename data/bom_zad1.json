@@ -1,0 +1,59 @@
+{
+  "items": [
+    {
+      "id": "STOL-001",
+      "name": "Stol",
+      "bom_level": 0,
+      "lead_time": 1,
+      "lot_size": 1,
+      "on_hand": 2,
+      "scheduled_receipts": {},
+      "parents": []
+    },
+    {
+      "id": "BLAT-001",
+      "name": "Blaty",
+      "bom_level": 1,
+      "lead_time": 3,
+      "lot_size": 40,
+      "on_hand": 22,
+      "scheduled_receipts": {},
+      "parents": [
+        {
+          "parent_id": "STOL-001",
+          "quantity_required": 1
+        }
+      ]
+    },
+    {
+      "id": "NOGI-001",
+      "name": "Nogi",
+      "bom_level": 1,
+      "lead_time": 2,
+      "lot_size": 120,
+      "on_hand": 40,
+      "scheduled_receipts": {},
+      "parents": [
+        {
+          "parent_id": "STOL-001",
+          "quantity_required": 4
+        }
+      ]
+    },
+    {
+      "id": "PLYTA-001",
+      "name": "Plyta pilsniowa",
+      "bom_level": 2,
+      "lead_time": 1,
+      "lot_size": 50,
+      "on_hand": 10,
+      "scheduled_receipts": {},
+      "parents": [
+        {
+          "parent_id": "BLAT-001",
+          "quantity_required": 1
+        }
+      ]
+    }
+  ]
+}
