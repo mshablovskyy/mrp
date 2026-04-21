@@ -44,7 +44,7 @@ pip install -r requirements.txt
 1. Run the engine:
 
 ```bash
-python mrp_engine.py --bom data/bom_zad1.json --ghp data/ghp_zad1.csv --out output
+python3 mrp_engine.py --bom data/bom_zad1.json --ghp data/ghp_zad1.csv --out output
 ```
 
 ## CLI Contract
