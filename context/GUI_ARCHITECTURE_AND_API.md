@@ -118,3 +118,17 @@ week,demand,production
 3,20,28
 4,0,0
 ```
+
+---
+
+## 6. Reference Behavior Patterns
+
+The engine follows these key MRP logic patterns. Understanding them helps debug UI behavior and interpret results:
+
+1. **One Lot Per Shortage**: When there's a net requirement, the engine orders exactly one lot (the `lot_size` value). It does NOT round to multiple lots. If shortage is 60 and lot_size is 40, it orders 40 - leaving projected_on_hand potentially negative.
+
+2. **Component Demand = Parent Planned Releases**: For sub-items (Level > 0), gross requirements are driven by parents' `planned_order_receipts`, NOT their gross requirements. This is critical for shared components.
+
+3. **Scheduled Receipts Offset Shortage**: External scheduled receipts (incoming inventory already in transit) offset the shortage first. If you have 30 units arriving in Week 1 and need 30, no new order is created.
+
+4. **Level-by-Level Processing**: The engine processes all Level 0 items first, then Level 1, then Level 2, etc. This ensures parent planned releases are calculated before child demand is derived.
