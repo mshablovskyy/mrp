@@ -1,5 +1,5 @@
 week,gross_requirements,scheduled_receipts,projected_on_hand,net_requirements,planned_order_receipts,planned_order_releases
 1,0,0,0,0,0,10
-2,1,0,9,1,10,0
-3,1,0,8,0,0,0
-4,0,0,8,0,0,0
+2,20,0,-10,20,10,10
+3,0,0,0,10,10,0
+4,0,0,0,0,0,0

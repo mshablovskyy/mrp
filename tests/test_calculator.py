@@ -95,6 +95,7 @@ def test_lead_time_pushes_release_before_week_one_logs_warning(caplog) -> None:
         )
 
     week = result.weeks[0]
-    assert week.planned_order_receipts == 10
-    assert week.planned_order_releases == 0
+    # With fixed behavior: order placed at week 1 (clamped), receipt arrives later
+    assert week.planned_order_receipts == 0  # Receipt in week 3, not week 1
+    assert week.planned_order_releases == 10  # Release at week 1 (clamped from -1)
     assert "Negative release week" in caplog.text

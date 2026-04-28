@@ -24,7 +24,7 @@ def calculate_item_mrp(
     scheduled_receipts: Dict[int, int] = {}
     projected_on_hand: Dict[int, int] = {0: item.on_hand}
     net_requirements: Dict[int, int] = {}
-    planned_order_receipts: Dict[int, int] = {}
+    planned_order_receipts: Dict[int, int] = defaultdict(int)
     planned_order_releases_all = defaultdict(int)
 
     for week in range(1, horizon + 1):
@@ -32,14 +32,16 @@ def calculate_item_mrp(
             gross = ghp_production.get(week, 0)
             scheduled = item.scheduled_receipts.get(week, 0)
 
-            # Final product follows MPS directly: planned receipts come from GHP production.
             receipt = ghp_production.get(week, 0)
             net = 0
-            projected = projected_on_hand[week - 1] + scheduled + receipt - gross
 
             release_week = week - item.lead_time
+            actual_release_week = max(release_week, 1)
+            receipt_week = actual_release_week + item.lead_time
+
             if receipt > 0:
-                planned_order_releases_all[release_week] += receipt
+                planned_order_receipts[receipt_week] += receipt
+                planned_order_releases_all[actual_release_week] += receipt
                 if release_week < 1:
                     logger.warning(
                         "Negative release week: item_id=%s receipt_week=%s release_week=%s quantity=%s",
@@ -49,11 +51,13 @@ def calculate_item_mrp(
                         receipt,
                     )
 
+            projected = projected_on_hand[week - 1] + scheduled + planned_order_receipts.get(week, 0) - gross
+
             gross_requirements[week] = gross
             scheduled_receipts[week] = scheduled
             projected_on_hand[week] = projected
             net_requirements[week] = net
-            planned_order_receipts[week] = receipt
+            planned_order_receipts[week] = planned_order_receipts.get(week, 0)
             continue
         else:
             gross = 0
@@ -62,20 +66,19 @@ def calculate_item_mrp(
                 gross += parent_release * parent.quantity_required
 
         scheduled = item.scheduled_receipts.get(week, 0)
-        preliminary_on_hand = projected_on_hand[week - 1] + scheduled - gross
+        current_receipt = planned_order_receipts.get(week, 0)
+        preliminary_on_hand = projected_on_hand[week - 1] + scheduled + current_receipt - gross
 
-        if preliminary_on_hand < 0:
-            net = abs(preliminary_on_hand)
+        in_transit = sum(planned_order_receipts[w] for w in range(week + 1, horizon + 1))
+
+        if preliminary_on_hand + in_transit < 0:
+            net = abs(preliminary_on_hand) if preliminary_on_hand < 0 else 0
             receipt = item.lot_size
-            projected = preliminary_on_hand + receipt
-        else:
-            net = 0
-            receipt = 0
-            projected = preliminary_on_hand
-
-        release_week = week - item.lead_time
-        if receipt > 0:
-            planned_order_releases_all[release_week] += receipt
+            release_week = week - item.lead_time
+            actual_release_week = max(release_week, 1)
+            receipt_week = actual_release_week + item.lead_time
+            planned_order_receipts[receipt_week] += receipt
+            planned_order_releases_all[actual_release_week] += receipt
             if release_week < 1:
                 logger.warning(
                     "Negative release week: item_id=%s receipt_week=%s release_week=%s quantity=%s",
@@ -84,12 +87,17 @@ def calculate_item_mrp(
                     release_week,
                     receipt,
                 )
+        else:
+            net = 0
+            receipt = 0
+
+        projected = projected_on_hand[week - 1] + scheduled + planned_order_receipts.get(week, 0) - gross
 
         gross_requirements[week] = gross
         scheduled_receipts[week] = scheduled
         projected_on_hand[week] = projected
         net_requirements[week] = net
-        planned_order_receipts[week] = receipt
+        planned_order_receipts[week] = planned_order_receipts.get(week, 0)
 
     result_weeks = []
     for week in range(1, horizon + 1):

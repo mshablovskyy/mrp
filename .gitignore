@@ -212,3 +212,4 @@ output/*.csv
 
 # My stuff
 .ai/
+.DS_Store
