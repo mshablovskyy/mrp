@@ -12,17 +12,21 @@ st.set_page_config(page_title="BOM Architecture", layout="wide")
 st.title("🌳 Architektura BOM i Drzewo Produktu")
 st.write("Wizualizacja hierarchii produktu oraz edytor struktury materiałowej.")
 
-BOM_FILE_PATH = "data/bom_zad1.json"
+BOM_FILE = st.session_state.get("bom_path", "data/bom_zad1.json")
+
+st.info(f"📁 Plik BOM: `{BOM_FILE}`")
 
 def load_bom_data():
-    if os.path.exists(BOM_FILE_PATH):
-        with open(BOM_FILE_PATH, "r", encoding="utf-8") as f:
+    if os.path.exists(BOM_FILE):
+        with open(BOM_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
     return {"items": []}
 
-# Inicjalizacja danych w stanie
-if "bom_text" not in st.session_state:
+
+if "last_loaded_bom_path" not in st.session_state or st.session_state.last_loaded_bom_path != BOM_FILE:
     st.session_state.bom_text = json.dumps(load_bom_data(), indent=2)
+    st.session_state.last_loaded_bom_path = BOM_FILE
+
 
 bom_data = load_bom_data()
 
@@ -56,7 +60,7 @@ def generate_dot_graph(items):
     return dot
 
 # Dzielimy ekran na dwie zakładki!
-tab1, tab2 = st.tabs(["🌳 Drzewo Wizualne", "📝 Edytor Struktury (JSON)"])
+tab1, tab2 = st.tabs(["Drzewo Wizualne", "Edytor Struktury (JSON)"])
 
 # --- ZAKŁADKA 1: GRAF ---
 with tab1:
@@ -80,7 +84,7 @@ with tab2:
         if st.button("💾 Zapisz zmiany w strukturze", type="primary"):
             try:
                 new_data = json.loads(new_bom_text)
-                success = save_bom_with_history(BOM_FILE_PATH, new_data)
+                success = save_bom_with_history(BOM_FILE, new_data)
                 
                 if success:
                     st.success("Zapisano zmiany!")
@@ -94,10 +98,10 @@ with tab2:
     with col2:
         st.info("💡 **Wskazówka:** Produkt główny (zaznaczony na zielono na grafie) musi mieć `bom_level: 0`.")
         st.subheader("Opcje historii")
-        if st.button("↩️ Cofnij (Przywróć poprzednią wersję)"):
-            if restore_bom_history(BOM_FILE_PATH):
-                st.success("Przywrócono poprzednią wersję pliku!")
+        if st.button("↩️ Cofnij zmiany"):
+            if restore_bom_history(BOM_FILE):
+                st.success("Cofnięto zmiany")
                 st.session_state.bom_text = json.dumps(load_bom_data(), indent=2)
                 st.rerun()
             else:
-                st.warning("Brak kopii zapasowej do przywrócenia.")
+                st.warning("Brak kopii zapasowej dla tego pliku.")

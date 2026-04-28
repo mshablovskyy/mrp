@@ -12,11 +12,13 @@ st.set_page_config(page_title="Parameter Tweaker", layout="wide")
 st.title("🎛️ Symulator Parametrów (What-If)")
 st.write("Szybko modyfikuj zmienne bez obaw o uszkodzenie hierarchii BOM.")
 
-BOM_FILE_PATH = "data/bom_zad1.json"
+BOM_FILE = st.session_state.get("bom_path", "data/bom_zad1.json")
+
+st.info(f"📁 Plik BOM: `{BOM_FILE}`")
 
 def load_bom_data():
-    if os.path.exists(BOM_FILE_PATH):
-        with open(BOM_FILE_PATH, "r", encoding="utf-8") as f:
+    if os.path.exists(BOM_FILE):
+        with open(BOM_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
     return {"items": []}
 
@@ -97,7 +99,7 @@ else:
         if submit:
             new_bom_data = {"items": updated_items}
             # Zapis z użyciem historii, którą zrobiliśmy wcześniej
-            success = save_bom_with_history(BOM_FILE_PATH, new_bom_data)
+            success = save_bom_with_history(BOM_FILE, new_bom_data)
             if success:
                 st.success("Parametry zaktualizowane i zapisane pomyślnie!")
             else:
@@ -105,9 +107,9 @@ else:
 
     # Przycisk Undo
     st.subheader("Opcje historii")
-    if st.button("↩️ Cofnij (Przywróć poprzednią wersję)"):
-        if restore_bom_history(BOM_FILE_PATH):
-            st.success("Przywrócono poprzednią wersję pliku!")
+    if st.button("↩️ Cofnij zmiany"):
+        if restore_bom_history(BOM_FILE):
+            st.success("Cofnięto zmiany.")
             st.rerun() # Automatyczne odświeżenie strony po cofnięciu
         else:
-            st.warning("Brak kopii zapasowej do przywrócenia.")
+            st.warning("Brak kopii zapasowej dla tego pliku.")
