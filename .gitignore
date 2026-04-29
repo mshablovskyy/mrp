@@ -212,4 +212,5 @@ output/*.csv
 
 # My stuff
 .ai/
+context/
 .DS_Store
