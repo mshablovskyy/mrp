@@ -1,3 +1,5 @@
 # This project uses only Python standard library modules.
 # Keep this file for consistent setup workflows (pip install -r requirements.txt).
 pytest>=8.0.0
+streamlit>=1.28.0
+pandas>=2.0.0
