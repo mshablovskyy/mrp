@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
+from pathlib import Path
 
 from src.engine import run_engine
 from src.io_parsers import load_bom, load_ghp, validate_inputs
@@ -50,6 +51,11 @@ def main() -> int:
             horizon=horizon,
             logger=logger,
         )
+
+        out_path = Path(args.out)
+        if out_path.exists():
+            for f in out_path.glob("*_mrp.csv"):
+                f.unlink()
 
         for item_id in sorted(results):
             output_file = write_item_mrp_csv(results[item_id], args.out)
