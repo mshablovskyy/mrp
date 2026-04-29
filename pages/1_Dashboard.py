@@ -81,18 +81,22 @@ st.divider()
 if st.session_state.get("run_successful", False):
     st.subheader("📊 Wyniki MRP")
     item_names = {}
+    bom_levels = {}
     if os.path.exists(BOM_FILE):
         with open(BOM_FILE, "r", encoding="utf-8") as f:
             try:
                 bom_data = json.load(f)
                 item_names = {item["id"]: item["name"] for item in bom_data.get("items", [])}
+                bom_levels = {item["id"]: item.get("bom_level", 0) for item in bom_data.get("items", [])}
             except json.JSONDecodeError:
                 pass
 
-    output_files = sorted(glob.glob(os.path.join(OUTPUT_DIR, "*_mrp.csv")))
-    
+    output_files = glob.glob(os.path.join(OUTPUT_DIR, "*_mrp.csv"))
+    item_ids = [os.path.basename(f).replace("_mrp.csv", "") for f in output_files]
+    item_ids.sort(key=lambda x: (bom_levels.get(x, 0), x))
+    output_files = [os.path.join(OUTPUT_DIR, f"{item_id}_mrp.csv") for item_id in item_ids]
+
     if output_files:
-        item_ids = [os.path.basename(f).replace("_mrp.csv", "") for f in output_files]
         
         tab_labels = [f"{item_names.get(item_id, item_id)}" for item_id in item_ids]
         
