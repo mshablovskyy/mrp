@@ -1,5 +1,7 @@
 # Core MRP Engine (Python)
 
+> **Note for reviewers:** This project was a university group assignment. The `main` branch contains only my individual work. The `with-teammates` branch contains the full project including teammates' contributions. When evaluating my work, please check the `main` branch.
+
 A stateless CLI backend that calculates Material Requirements Planning (MRP) tables from:
 
 - BOM registry JSON
